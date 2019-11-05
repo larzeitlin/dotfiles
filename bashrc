@@ -7,6 +7,6 @@ export VISUAL=vim
 export EDITOR=$c="visual"
 export SB_ROOT=~/sb_root/
 export JAVA_HOME=/usr/bin/java
-echo 'export PATH="$HOME/.rbenv/bin:$PATH"' >> ~/.bash_profile
-source /usr/local/share/chruby/chruby.sh
-export PATH="$HOME/.rbenv/bin:$PATH"
+[ -f ~/.fzf.bash ] && source ~/.fzf.bash
+alias t='xfce4-terminal'
+
