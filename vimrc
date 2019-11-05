@@ -22,3 +22,5 @@ imap kj <Esc>
 :set clipboard=unnamedplus
 execute pathogen#infect()
 filetype plugin indent on
+nnoremap <C-p> :Files<Cr>
+
