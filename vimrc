@@ -17,7 +17,6 @@ ino ' ''<left>
 ino ( ()<left>
 ino [ []<left>
 ino { {}<left>
-imap kj <Esc>
 :set relativenumber
 set clipboard=unnamedplus
 execute pathogen#infect()
