@@ -28,3 +28,4 @@ Rg() {
 }
 
 bind -x '"\C-p": fe'
+alias hiss='amixer -c PCH cset "name=Headphone Mic Boost Volume" 1'

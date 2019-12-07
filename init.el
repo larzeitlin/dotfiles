@@ -74,3 +74,19 @@
  '(package-selected-packages
    (quote
     (projectile ## zenburn-theme yascroll rainbow-delimiters paredit ox-reveal org-bullets magit lsp-ui htmlize helm evil doom-themes doom-modeline doom company-lsp cmake-ide cider auto-complete))))
+
+(require 'clj-refactor)
+
+(defun my-clojure-mode-hook ()
+    (clj-refactor-mode 1)
+    (yas-minor-mode 1) ; for adding require/use/import statements
+    ;; This choice of keybinding leaves cider-macroexpand-1 unbound
+    (cljr-add-keybindings-with-prefix "C-c C-m"))
+
+
+
+(require 'cider)
+(setq cider-cljs-lein-repl
+      "(do (require 'figwheel-sidecar.repl-api)
+           (figwheel-sidecar.repl-api/start-figwheel!)
+           (figwheel-sidecar.repl-api/cljs-repl))")

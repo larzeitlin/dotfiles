@@ -23,6 +23,4 @@ execute pathogen#infect()
 filetype plugin indent on
 nnoremap <C-p> :Files<Cr>
 map <C-r> :Rg<cr>
-nnoremap <C-t> :below terminal<CR>
-map <C-t><left> :tabp<cr>
-map <C-t><right> :tabn<cr>
+set splitbelow
