@@ -209,7 +209,7 @@ gaps inner 4
 gaps outer 0
 for_window [class="^.*"] border pixel 1
 
-exec_always feh --bg-scale ~/Pictures/wp.jpg
+exec_always feh --bg-scale ~/Pictures/wp.png
 bindsym $mod+d exec rofi -show run -theme onedark -font "Ubuntu Mono 20"
 exec_always compton -f
 exec_always pactl load-module module-bluetooth-discover

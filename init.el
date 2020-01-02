@@ -40,7 +40,6 @@
 (set-face-attribute 'mode-line nil :box nil)
 (set-face-attribute 'mode-line-inactive nil :box nil)
 (global-hl-line-mode +1)
-(global-set-key (kbd "C-x C-b") 'ibuffer)
 (setq ido-enable-flex-matching t)
 (setq ido-everywhere t)
 (ido-mode 1)
@@ -49,31 +48,28 @@
 (require 'doom-modeline)
 (doom-modeline-mode 1)
 (global-visual-line-mode 1)
-
-
-
+	
 (setq package-list '(helm
                      helm-projectile
                      helm-ag))
 
 (global-set-key (kbd "M-x") #'helm-M-x)
-(global-set-key (kbd "s-f") #'helm-projectile-ag)
-(global-set-key (kbd "s-t") #'helm-projectile-find-file-dwim)
-
-
+(global-set-key (kbd "C-x C-b") #'helm-buffers-list)
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(custom-enabled-themes (quote (doom-spacegrey)))
  '(custom-safe-themes
    (quote
-    ("d6f04b6c269500d8a38f3fabadc1caa3c8fdf46e7e63ee15605af75a09d5441e" "93a0885d5f46d2aeac12bf6be1754faa7d5e28b27926b8aa812840fe7d0b7983" default)))
+    ("d6f04b6c269500d8a38f3fabadc1caa3c8fdf46e7e63ee15605af75a09d5441e" "c8f959fb1ea32ddfc0f50db85fea2e7d86b72bb4d106803018be1c3566fd6c72" default)))
+ '(initial-buffer-choice t)
  '(package-selected-packages
    (quote
-    (projectile ## zenburn-theme yascroll rainbow-delimiters paredit ox-reveal org-bullets magit lsp-ui htmlize helm evil doom-themes doom-modeline doom company-lsp cmake-ide cider auto-complete))))
+    (projectile rainbow-delimiters paredit ox-reveal org-bullets magit htmlize helm evil doom-themes doom-modeline doom cmake-ide cider))))
+
+(load-theme 'doom-spacegrey)
 
 (require 'clj-refactor)
 
@@ -83,10 +79,22 @@
     ;; This choice of keybinding leaves cider-macroexpand-1 unbound
     (cljr-add-keybindings-with-prefix "C-c C-m"))
 
-
-
 (require 'cider)
 (setq cider-cljs-lein-repl
       "(do (require 'figwheel-sidecar.repl-api)
            (figwheel-sidecar.repl-api/start-figwheel!)
            (figwheel-sidecar.repl-api/cljs-repl))")
+
+(require 'cider)
+(add-hook 'clojure-mode-hook 'cider-mode)
+(add-hook 'cider-interaction-mode-hook 'cider-turn-on-eldoc-mode)
+
+(global-company-mode)
+
+;; minibuffer, stop cursor going into prompt
+(customize-set-variable
+ 'minibuffer-prompt-properties
+ (quote (read-only t cursor-intangible t face minibuffer-prompt)))
+
+(setq show-paren-style 'expression)
+

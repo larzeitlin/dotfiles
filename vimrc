@@ -24,3 +24,4 @@ filetype plugin indent on
 nnoremap <C-p> :Files<Cr>
 map <C-r> :Rg<cr>
 set splitbelow
+"Add some tab navigation keys"

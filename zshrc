@@ -13,6 +13,8 @@ export PYTHONPATH="${PYTHONPATH}:$HOME/analytics-scripts/Python Scripts"
 export PYTHONPATH="${PYTHONPATH}:$HOME/analytics-scripts"
 alias bigs='~/.screenlayout/bigscreen1.sh'
 alias laps='~/.screenlayout/lapscreen.sh'
+alias power='acpi'
+alias nm='nmtui'
 export VISUAL=vim
 export EDITOR=vim
 export SB_ROOT=~/sb_root/
@@ -33,3 +35,5 @@ Rg() {
 zle -N Rg
 bindkey "^g" Rg
 
+
+source /usr/share/nvm/init-nvm.sh
