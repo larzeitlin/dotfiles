@@ -53,6 +53,12 @@ bindsym $mod+Shift+q kill
 # start emacs
 bindsym $mod+backslash exec emacsclient -c -n -e '(switch-to-buffer nil)'
 
+
+# Make the currently focused window a scratchpad
+bindsym $mod+Shift+minus move scratchpad
+
+# Show the first scratchpad window
+bindsym $mod+minus scratchpad show
 # start dmenu (a program launcher)
 #bindsym $mod+d exec dmenu_run
 # There also is the (new) i3-dmenu-desktop which only displays applications
