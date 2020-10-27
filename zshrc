@@ -9,12 +9,6 @@ plugins=(
 )
 SAVEHIST=999999999999
 source $ZSH/oh-my-zsh.sh
-export PYTHONPATH="${PYTHONPATH}:$HOME/analytics-scripts/Python Scripts"
-export PYTHONPATH="${PYTHONPATH}:$HOME/analytics-scripts"
-alias bigs='~/.screenlayout/bigscreen1.sh'
-alias laps='~/.screenlayout/lapscreen.sh'
-alias power='acpi'
-alias nm='nmtui'
 export VISUAL=vim
 export EDITOR=vim
 export SB_ROOT=~/sb_root/
@@ -56,11 +50,4 @@ function zle-keymap-select {
   fi
 }
 zle -N zle-keymap-select
-
-# Use beam shape cursor on startup.
-echo -ne '\e[5 q'
-
-# Use beam shape cursor for each new prompt.
-preexec() {
-   echo -ne '\e[5 q'
-}
+alias notion='$HOME/.notion.sh'
