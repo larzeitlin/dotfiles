@@ -14,10 +14,7 @@
                       ac-cider
                       flycheck-clj-kondo
                       auto-complete
-                      cider
-		      helm
-		      helm-projectile
-		      helm-ag))
+                      cider))
 
 (dolist (p my-packages)
   (when (not (package-installed-p p))
