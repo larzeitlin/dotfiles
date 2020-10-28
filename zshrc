@@ -15,7 +15,6 @@ export SB_ROOT=~/sb_root/
 export JAVA_HOME=/usr/bin/java
 export FZF_DEFAULT_COMMAND='rg --files --no-ignore --hidden --follow -g "!{.git,node_modules}/*" 2> /dev/null'
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
-alias t='xfce4-terminal'
 
 fe() {
   </dev/tty vim -c Files

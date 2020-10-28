@@ -1,23 +1,45 @@
-(package-initialize)
 
 
 ;;;;;;;;;;;;;;;;;;;;; REQUIRE ;;;;;;;;;;;;;;;;;;;;;;;
 (require 'package)
 (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/"))
 (add-to-list 'custom-theme-load-path "~/.emacs.d/themes")
-(require 'doom-themes)
-(require 'doom-modeline)
-(require 'evil)
-(require 'clj-refactor)
-(require 'ac-cider)
-(require 'auto-complete)
-(require 'cider)
-(use-package clojure-mode
-  :ensure t
-  :config
-  (require 'flycheck-clj-kondo))
+(package-initialize)
+
+(defvar my-packages '(doom-themes
+                      clojure-mode
+                      doom-modeline
+                      evil
+                      clj-refactor
+                      ac-cider
+                      flycheck-clj-kondo
+                      auto-complete
+                      cider
+		      helm
+		      helm-projectile
+		      helm-ag))
+
+(dolist (p my-packages)
+  (when (not (package-installed-p p))
+    (print (format "Installing %s" p))
+    (package-install p)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(setq inhibit-startup-message t) ;; No splash screen
+(setq initial-scratch-message nil) ;; No scratch message
+
+
+(defvar user-temporary-file-directory "~/.emacs-backup")
+(make-directory user-temporary-file-directory t)
+(setq backup-by-copying t) 
+(setq backup-directory-alist 
+      `(("." . ,user-temporary-file-directory)
+	(,tramp-file-name-regexp nil)))
+(setq auto-save-list-file-prefix
+      (concat user-temporary-file-directory ".auto-saves-"))
+(setq auto-save-file-name-transforms
+      `((".*" ,user-temporary-file-directory t)))
+
 
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
@@ -31,8 +53,15 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
-   '("615123f602c56139c8170c153208406bf467804785007cdc11ba73d18c3a248b" default))
- '(initial-buffer-choice t))
+   (quote
+    ("6b80b5b0762a814c62ce858e9d72745a05dd5fc66f821a1c5023b4f2a76bc910" "615123f602c56139c8170c153208406bf467804785007cdc11ba73d18c3a248b" default)))
+ '(initial-buffer-choice t)
+ '(minibuffer-prompt-properties
+   (quote
+    (read-only t cursor-intangible t face minibuffer-prompt)))
+ '(package-selected-packages
+   (quote
+    (rainbow-delimiters clojure-mode-extra-font-locking paredit-menu helm flycheck-clj-kondo evil doom-themes doom-modeline company clj-refactor aggressive-indent ac-cider))))
 
 ;;;;;;;;;;;;;;;;; DOOM THEME ;;;;;;;;;;;;;;;;;;;;;;;;;
 (setq doom-themes-enable-bold nil    ; if nil, bold is universally disabled
@@ -59,36 +88,15 @@
 (set-face-attribute 'mode-line nil :box nil)
 (set-face-attribute 'mode-line-inactive nil :box nil)
 (setq show-paren-style 'expression)
-(set-face-attribute 'default nil
-                    :family "Inconsolata"
-                    :height 130
-                    :weight 'normal
-                    :width 'normal)
 (customize-set-variable
  'minibuffer-prompt-properties
  (quote (read-only t cursor-intangible t face minibuffer-prompt)))
+(setq custom-safe-themes t)
 ;;;;;;;;;;;;;;;;;;;;;; HELM ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (global-set-key (kbd "M-x") #'helm-M-x)
 (global-set-key (kbd "C-x C-b") #'helm-buffers-list)
 
-;;;;;;;;;;;;;;;;;;;;;; HOOKS ;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun clojure-auto-complete-hook ()
-  (auto-complete-mode 1))
-
-(defun my-clojure-mode-hook ()
-  (clj-refactor-mode 1)
-  (yas-minor-mode 1) ; for adding require/use/import statements
-  ;; This choice of keybinding leaves cider-macroexpand-1 unbound
-  (cljr-add-keybindings-with-prefix "C-c C-m"))
-
-(add-hook 'auto-complete-mode-hook 'set-auto-complete-as-completion-at-point-function)
-(add-hook 'cider-interaction-mode-hook 'cider-turn-on-eldoc-mode)
-(add-hook 'cider-mode-hook 'ac-cider-setup)
-(add-hook 'cider-mode-hook 'ac-flyspell-workaround)
-(add-hook 'cider-mode-hook 'set-auto-complete-as-completion-at-point-function)
-(add-hook 'cider-repl-mode-hook 'ac-cider-setup)
-(add-hook 'clojure-mode-hook 'cider-mode)
-(add-hook 'clojure-mode-hook 'clojure-auto-complete-hook)
+;;;;;;;;;;;;;;;;;;;;;; PARENS ;;;;;;;;;;;;;;;;;;;;;;;;;;
 (add-hook 'clojure-mode-hook 'paredit-mode)
 (add-hook 'clojure-mode-hook 'rainbow-delimiters-mode)
 (add-hook 'clojure-repl-mode-hook 'paredit-mode)
@@ -114,11 +122,10 @@
 (add-to-list 'ac-modes 'cider-repl-mode)
 (defun set-auto-complete-as-completion-at-point-function ()
   (setq completion-at-point-functions '(auto-complete)))
+(add-hook 'auto-complete-mode-hook 'set-auto-complete-as-completion-at-point-function)
+(add-hook 'cider-repl-mode-hook 'set-auto-complete-as-completion-at-point-function)
+(add-hook 'cider-mode-hook 'set-auto-complete-as-completion-at-point-function)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(setq package-list '(helm
-                     helm-projectile
-                     helm-ag))
 
 (setq cider-cljs-lein-repl
       "(do (require 'figwheel-sidecar.repl-api)
