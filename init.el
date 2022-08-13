@@ -129,3 +129,17 @@
            (figwheel-sidecar.repl-api/start-figwheel!)
            (figwheel-sidecar.repl-api/cljs-repl))")
 
+(setq cider-show-error-buffer nil)
+(setq cider-save-file-on-load t)
+
+(require 'expand-region)
+(global-set-key (kbd "<M-s-up>") 'er/expand-region)
+(global-set-key (kbd "<M-s-down>") 'er/contract-region)
+(global-set-key (kbd "<M-s-right>") 'paredit-forward)
+(global-set-key (kbd "<M-s-left>") 'paredit-backward)
+(global-set-key (kbd "M-s-c") 'lsp-format-region)
+(global-set-key (kbd "M-s-r") 'paredit-raise-sexp)
+(global-set-key (kbd "M-s-b") 'paredit-wrap-round)
+(global-set-key (kbd "M-s-[") 'paredit-wrap-square)
+(global-set-key (kbd "M-s-{") 'paredit-wrap-curly)
+(global-set-key (kbd "M-s-k") 'paredit-kill)
