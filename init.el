@@ -1,19 +1,24 @@
 (require 'package)
 (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
-
 (tool-bar-mode -1)
 (menu-bar-mode -1)
 (scroll-bar-mode -1)
 (column-number-mode)
 (global-display-line-numbers-mode t)
 (global-visual-line-mode t)
-(set-face-attribute 'default nil :height 120)
+(set-frame-font "Fira Code 12" nil t)
 (package-initialize)
 (show-paren-mode)
 (setq backup-directory-alist '(("" . "~/.emacs.d/emacs-backup")))
 (setq auto-save-default nil)
 (setq create-lockfiles nil)
 (setq inhibit-startup-screen t)
+
+(load-theme 'doom-monokai-octagon t)
+
+(use-package doom-modeline
+  :ensure t
+  :hook (after-init . doom-modeline-mode))
 
 (use-package general
   :ensure t
@@ -31,7 +36,8 @@
 
 (use-package rainbow-delimiters
   :ensure t
-  :hook (prog-mode . rainbow-delimiters-mode))
+  :hook ((prog-mode . rainbow-delimiters-mode)
+	 (slime-repl-mode . rainbow-delimiters-mode)))
 
 (use-package company
   :ensure t
@@ -109,7 +115,8 @@
 	 (lisp-mode             . paredit-mode)
 	 (lisp-interaction-mode . paredit-mode)
 	 (scheme-mode           . paredit-mode)
-	 (slime-mode            . paredit-mode)))
+	 (slime-mode            . paredit-mode)
+	 (slime-repl-mode       . paredit-mode)))
 
 (use-package expand-region
   :ensure t
@@ -130,6 +137,10 @@
   :config
   (require 'flycheck-clj-kondo))
 
+(use-package rust-mode
+  :ensure t
+  :config (setq rust-format-on-save t))
+
 (use-package flycheck 
   :ensure t
   :hook ((clojure-mode . flycheck-mode)))
@@ -140,13 +151,15 @@
 	 (clojurescript-mode . lsp)
 	 (clojurec-mode      . lsp)
 	 (js2-mode           . lsp)
-	 (python-mode        . lsp))
+	 (python-mode        . lsp)
+	 (rust-mode-hook     . lsp))
   :init
   (setq gc-cons-threshold (* 100 1024 1024)
 	read-process-output-max (* 1024 1024)
 	treemacs-space-between-root-nodes nil
 	company-minimum-prefix-length 1
-	lsp-lens-enable t))
+	lsp-lens-enable t
+	lsp-headerline-breadcrumb-enable nil)) 
 
 (use-package git-gutter
   :ensure t
@@ -166,16 +179,26 @@
   :config (which-key-mode))
 
 (use-package vterm
-  :ensure t)
+  :ensure t
+  :config)
+
+(use-package multi-vterm :ensure t)
 
 (use-package consult-projectile
   :ensure t)
+
+(general-def
+  :states '(normal)
+  :keymaps 'vterm-mode-map
+  "p" 'vterm-yank
+  "P" 'vterm-yank)
 
 (general-def
   :states  '(normal visual motion)
   :prefix "SPC"
   "SPC" 'consult-projectile-find-file
   "<tab>" 'projectile-switch-project
+  "j" 'dired-jump
   "p" 'consult-git-grep
   "f" 'consult-line
   "B" 'consult-line-multi
@@ -188,7 +211,9 @@
   "0" 'delete-window
   "1" 'delete-other-windows
   "3" 'split-window-horizontally
-  "2" 'split-window-vertically)
+  "2" 'split-window-vertically
+  "5" 'make-frame-command
+  )
 
 (general-def
   :states '(normal visual motion)
@@ -203,6 +228,7 @@
   "e r" 'cider-eval-region
   "i" 'cider-inspect-last-sexp
   "n" 'cider-repl-set-ns
+  "d" 'cider-doc
   "l" 'cider-load-buffer
   "q" 'cider-quit
   "r" 'cider-switch-to-repl-buffer
@@ -231,10 +257,47 @@
   :prefix "SPC w"
   "r" 'windresize)
 
+(general-def
+  :states '(normal visual motion)
+  :prefix "SPC i"
+  "e" (lambda() (interactive)(find-file "~/dotfiles/init.el"))
+  "3" (lambda() (interactive)(find-file "~/dotfiles/i3-config"))
+  "z" (lambda() (interactive)(find-file "~/.zshrc")))
+
 (use-package slime
   :ensure t
   :config (setq inferior-lisp-program "/usr/bin/sbcl"))
 
 (require 'org-tempo)
 
-(load-theme 'modus-vivendi)
+(use-package all-the-icons
+  :ensure t
+  :if (display-graphic-p))
+
+(use-package simple-httpd
+  :ensure t)
+
+(use-package flymake-python-pyflakes
+  :ensure t
+  :hook ((python-mode-hook . flymake-python-pyflakes-load)))
+
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(ispell-dictionary nil)
+ '(lisp-mode-hook '(paredit-mode sly-editing-mode))
+ '(markdown-command "pandoc")
+ '(package-selected-packages
+   '(fira-code-mode rust-mode htmlize lsp-jedi flymake-python-pyflakes doom-modeline doom-themes zenburn-theme ox-publish all-the-icons multi-vterm cmake-mode windresize which-key vterm vertico use-package rainbow-delimiters paredit marginalia magit lsp-treemacs js2-mode git-gutter-fringe general flycheck-clj-kondo expand-region evil consult-projectile company cider auto-package-update))
+ '(safe-local-variable-values '((cider-repl-display-help-banner))))
+
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(default ((t nil)))
+ '(flycheck-error ((t (:background "#3a3d4b" :underline nil))))
+ '(flycheck-warning ((t (:background "SlateBlue4" :underline nil)))))
