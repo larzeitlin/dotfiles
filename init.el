@@ -6,7 +6,6 @@
 (column-number-mode)
 (global-display-line-numbers-mode t)
 (global-visual-line-mode t)
-(set-frame-font "Fira Code 12" nil t)
 (package-initialize)
 (show-paren-mode)
 (setq backup-directory-alist '(("" . "~/.emacs.d/emacs-backup")))
@@ -14,11 +13,10 @@
 (setq create-lockfiles nil)
 (setq inhibit-startup-screen t)
 
-(load-theme 'doom-monokai-octagon t)
-
-(use-package doom-modeline
+(use-package timu-spacegrey-theme
   :ensure t
-  :hook (after-init . doom-modeline-mode))
+  :config
+  (load-theme 'timu-spacegrey t))
 
 (use-package general
   :ensure t
@@ -32,8 +30,6 @@
   :ensure t
   :init (setq magit-display-buffer-function #'magit-display-buffer-fullframe-status-v1))
 
-(setq completion-styles '(flex))
-
 (use-package rainbow-delimiters
   :ensure t
   :hook ((prog-mode . rainbow-delimiters-mode)
@@ -43,12 +39,24 @@
   :ensure t
   :custom (add-hook 'after-init-hook 'global-company-mode))
 
+(use-package savehist
+  :ensure t
+  :init
+  (savehist-mode))
+
 (use-package vertico
   :ensure t
   :init (vertico-mode)
   :custom
   (vertico-cycle t)
   (setq completion-styles '(hotfuzz flex)))
+
+(use-package orderless
+  :ensure t
+  :init
+  (setq completion-styles '(orderless basic)
+        completion-category-defaults nil
+        completion-category-overrides '((file (styles partial-completion)))))
 
 (use-package savehist
   :ensure t
@@ -169,6 +177,7 @@
 
 (use-package git-gutter-fringe
   :ensure t
+  :init (setq-default left-fringe-width 20)
   :config
   (define-fringe-bitmap 'git-gutter-fr:added [224] nil nil '(center repeated))
   (define-fringe-bitmap 'git-gutter-fr:modified [224] nil nil '(center repeated))
@@ -219,13 +228,20 @@
   :states '(normal visual motion)
   :prefix "SPC s"
   "r" 'paredit-raise-sexp
-  "k" 'paredit-kill)
+  "k" 'paredit-kill
+  "b" 'paredit-backward
+  "f" 'paredit-forward)
+
+(general-def
+  :states '(normal visual motion)
+  "<M-up>" 'paredit-raise-sexp)
 
 (general-def
   :states '(normal visual motion)
   :prefix "SPC c"
   "e l" 'cider-eval-last-sexp
-  "e r" 'cider-eval-region
+  "e s" 'cider-eval-dwim
+  "e r" 'cider-eval-last-sexp-to-repl  
   "i" 'cider-inspect-last-sexp
   "n" 'cider-repl-set-ns
   "d" 'cider-doc
@@ -281,16 +297,29 @@
   :ensure t
   :hook ((python-mode-hook . flymake-python-pyflakes-load)))
 
+(setq org-default-notes-file (concat org-directory "/notes.org"))
+
+(use-package chatgpt-shell
+  :ensure t)
+
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((python . t)))
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(custom-safe-themes
+   '("a9abd706a4183711ffcca0d6da3808ec0f59be0e8336868669dc3b10381afb6f" "02f57ef0a20b7f61adce51445b68b2a7e832648ce2e7efb19d217b6454c1b644" "1cae4424345f7fe5225724301ef1a793e610ae5a4e23c023076dc334a9eb940a" "2e05569868dc11a52b08926b4c1a27da77580daa9321773d92822f7a639956ce" "bf948e3f55a8cd1f420373410911d0a50be5a04a8886cabe8d8e471ad8fdba8e" "e1f4f0158cd5a01a9d96f1f7cdcca8d6724d7d33267623cc433fe1c196848554" "4fda8201465755b403a33e385cf0f75eeec31ca8893199266a6aeccb4adedfa4" "9d29a302302cce971d988eb51bd17c1d2be6cd68305710446f658958c0640f68" "680f62b751481cc5b5b44aeab824e5683cf13792c006aeba1c25ce2d89826426" "251ed7ecd97af314cd77b07359a09da12dcd97be35e3ab761d4a92d8d8cf9a71" "51c71bb27bdab69b505d9bf71c99864051b37ac3de531d91fdad1598ad247138" "ae426fc51c58ade49774264c17e666ea7f681d8cae62570630539be3d06fd964" "991ca4dbb23cab4f45c1463c187ac80de9e6a718edc8640003892a2523cb6259" "7e068da4ba88162324d9773ec066d93c447c76e9f4ae711ddd0c5d3863489c52" default))
+ '(elfeed-feeds
+   '("http://feeds.bbci.co.uk/news/world/rss.xml#" "https://hnrss.org/frontpage" "http://feeds.bbci.co.uk/news/world/rss.xml"))
  '(ispell-dictionary nil)
  '(lisp-mode-hook '(paredit-mode sly-editing-mode))
  '(markdown-command "pandoc")
  '(package-selected-packages
-   '(fira-code-mode rust-mode htmlize lsp-jedi flymake-python-pyflakes doom-modeline doom-themes zenburn-theme ox-publish all-the-icons multi-vterm cmake-mode windresize which-key vterm vertico use-package rainbow-delimiters paredit marginalia magit lsp-treemacs js2-mode git-gutter-fringe general flycheck-clj-kondo expand-region evil consult-projectile company cider auto-package-update))
+   '(orderless org-babel chatgpt-shell chatgpt slack timu-spacegrey-theme ox-reveal all-the-icons-gnus clj-refactor elfeed typescript-mode fira-code-mode rust-mode htmlize lsp-jedi flymake-python-pyflakes zenburn-theme ox-publish all-the-icons multi-vterm cmake-mode windresize which-key vterm vertico use-package rainbow-delimiters paredit marginalia magit lsp-treemacs js2-mode git-gutter-fringe general flycheck-clj-kondo expand-region evil consult-projectile company cider auto-package-update))
  '(safe-local-variable-values '((cider-repl-display-help-banner))))
 
 (custom-set-faces
@@ -298,6 +327,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(default ((t nil)))
+ '(default ((t (:inherit nil :extend nil :stipple nil :background "#2b303b" :foreground "#c0c5ce" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :family "Ubuntu Mono" :height 160))))
  '(flycheck-error ((t (:background "#3a3d4b" :underline nil))))
  '(flycheck-warning ((t (:background "SlateBlue4" :underline nil)))))
+
