@@ -93,10 +93,11 @@
 (use-package cider
   :ensure t
   :init
-  (setq cider-repl-pop-to-buffer-on-connect nil)
+  (setq cider-repl-pop-to-buffer-on-connect 'display-only)
   (setq cider-popup-stacktraces nil)
   (setq cider-font-lock-dynamically '(macro core function var))
   (setq cider-show-error-buffer nil)
+  (setq cider-repl-buffer-size-limit 100000)
   (setq cider-save-file-on-load t))
 
 (use-package consult
@@ -183,6 +184,23 @@
   (define-fringe-bitmap 'git-gutter-fr:modified [224] nil nil '(center repeated))
   (define-fringe-bitmap 'git-gutter-fr:deleted [128 192 224 240] nil nil 'bottom))
 
+(general-def
+  :states '(normal visual motion)
+  :prefix "SPC g"
+  "n" 'git-gutter:next-hunk
+  "p" 'git-gutter:previous-hunk)
+
+(use-package elpy
+  :ensure t
+  :init
+  (elpy-enable)
+  :config
+  (setq python-shell-interpreter "jupyter"
+      python-shell-interpreter-args "console --simple-prompt"
+      python-shell-prompt-detect-failure-warning nil)
+  (add-to-list 'python-shell-completion-native-disabled-interpreters
+               "jupyter"))
+
 (use-package which-key
   :ensure t
   :config (which-key-mode))
@@ -227,6 +245,11 @@
 (general-def
   :states '(normal visual motion)
   :prefix "SPC s"
+  "c r" 'paredit-close-round
+  "c c" 'paredit-close-curly
+  "c s" 'paredit-close-square
+  "w r" 'paredit-wrap-round
+  "w q" 'paredit-meta-doublequote
   "r" 'paredit-raise-sexp
   "k" 'paredit-kill
   "b" 'paredit-backward
@@ -293,14 +316,7 @@
 (use-package simple-httpd
   :ensure t)
 
-(use-package flymake-python-pyflakes
-  :ensure t
-  :hook ((python-mode-hook . flymake-python-pyflakes-load)))
-
 (setq org-default-notes-file (concat org-directory "/notes.org"))
-
-(use-package chatgpt-shell
-  :ensure t)
 
 (org-babel-do-load-languages
  'org-babel-load-languages
@@ -319,8 +335,12 @@
  '(lisp-mode-hook '(paredit-mode sly-editing-mode))
  '(markdown-command "pandoc")
  '(package-selected-packages
-   '(orderless org-babel chatgpt-shell chatgpt slack timu-spacegrey-theme ox-reveal all-the-icons-gnus clj-refactor elfeed typescript-mode fira-code-mode rust-mode htmlize lsp-jedi flymake-python-pyflakes zenburn-theme ox-publish all-the-icons multi-vterm cmake-mode windresize which-key vterm vertico use-package rainbow-delimiters paredit marginalia magit lsp-treemacs js2-mode git-gutter-fringe general flycheck-clj-kondo expand-region evil consult-projectile company cider auto-package-update))
- '(safe-local-variable-values '((cider-repl-display-help-banner))))
+   '(nix-mode terraform-mode orderless org-babel chatgpt-shell chatgpt slack timu-spacegrey-theme ox-reveal all-the-icons-gnus clj-refactor elfeed typescript-mode fira-code-mode rust-mode htmlize lsp-jedi zenburn-theme ox-publish all-the-icons multi-vterm cmake-mode windresize which-key vterm vertico use-package rainbow-delimiters paredit marginalia magit lsp-treemacs js2-mode git-gutter-fringe general flycheck-clj-kondo expand-region evil consult-projectile company cider auto-package-update))
+ '(safe-local-variable-values
+   '((eval progn
+	   (make-variable-buffer-local 'cider-jack-in-nrepl-middlewares)
+	   (add-to-list 'cider-jack-in-nrepl-middlewares "shadow.cljs.devtools.server.nrepl/middleware"))
+     (cider-repl-display-help-banner))))
 
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
