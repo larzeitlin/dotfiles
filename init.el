@@ -12,6 +12,8 @@
 (setq auto-save-default nil)
 (setq create-lockfiles nil)
 (setq inhibit-startup-screen t)
+(setq ring-bell-function 'ignore)
+(setq initial-buffer-choice (file-truename "~/dotfiles/emacs-initial-buffer.org"))
 
 (use-package timu-spacegrey-theme
   :ensure t
@@ -303,9 +305,13 @@
   "3" (lambda() (interactive)(find-file "~/dotfiles/i3-config"))
   "z" (lambda() (interactive)(find-file "~/.zshrc")))
 
+(load (expand-file-name "~/quicklisp/slime-helper.el"))
+
 (use-package slime
   :ensure t
-  :config (setq inferior-lisp-program "/usr/bin/sbcl"))
+  :config (setq inferior-lisp-program "/usr/local/bin/sbcl"))
+
+(setf swank:*communication-style* nil)
 
 (require 'org-tempo)
 
@@ -321,6 +327,21 @@
 (org-babel-do-load-languages
  'org-babel-load-languages
  '((python . t)))
+
+(setq org-babel-clojure-backend 'cider)
+
+(use-package org-roam
+  :ensure t
+  :config
+  (setq org-roam-directory (file-truename "~/notes"))
+  (org-roam-db-autosync-mode))
+
+(use-package org-roam-ui
+  :after org-roam
+  :config (setq org-roam-ui-sync-theme t
+		org-roam-ui-follow 
+		org-roam-ui-update-on-save t
+		org-roam-ui-open-on-start t))
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -347,7 +368,6 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(default ((t (:inherit nil :extend nil :stipple nil :background "#2b303b" :foreground "#c0c5ce" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :family "Ubuntu Mono" :height 160))))
  '(flycheck-error ((t (:background "#3a3d4b" :underline nil))))
  '(flycheck-warning ((t (:background "SlateBlue4" :underline nil)))))
 
