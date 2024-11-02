@@ -15,10 +15,8 @@
 (setq ring-bell-function 'ignore)
 (setq initial-buffer-choice (file-truename "~/dotfiles/emacs-initial-buffer.org"))
 
-(use-package timu-spacegrey-theme
-  :ensure t
-  :config
-  (load-theme 'timu-spacegrey t))
+(set-face-attribute 'default nil :height 140)
+(setq org-confirm-babel-evaluate nil)
 
 (use-package general
   :ensure t
@@ -27,6 +25,11 @@
 (use-package evil
   :ensure t
   :config (evil-mode 1))
+
+(with-eval-after-load 'evil
+  (define-key evil-normal-state-map (kbd "C-r") nil)
+  (define-key evil-insert-state-map (kbd "C-r") nil)
+  (define-key evil-visual-state-map (kbd "C-r") nil))
 
 (use-package magit
   :ensure t
@@ -140,17 +143,10 @@
 (use-package flycheck-clj-kondo
   :ensure t)
 
-(use-package js2-mode
-  :ensure t)
-
 (use-package clojure-mode
   :ensure t
   :config
   (require 'flycheck-clj-kondo))
-
-(use-package rust-mode
-  :ensure t
-  :config (setq rust-format-on-save t))
 
 (use-package flycheck 
   :ensure t
@@ -258,6 +254,10 @@
   "f" 'paredit-forward)
 
 (general-def
+  "<M-s-right>" 'paredit-forward
+  "<M-s-left>" 'paredit-backward)
+
+(general-def
   :states '(normal visual motion)
   "<M-up>" 'paredit-raise-sexp)
 
@@ -286,10 +286,6 @@
   "C-+" 'text-scale-increase
   "C--" 'text-scale-decrease)
 
-(general-def
-  "<M-s-right>" 'paredit-forward
-  "<M-s-left>" 'paredit-backward)
-
 (use-package windresize
   :ensure t)
 
@@ -297,6 +293,10 @@
   :states '(normal visual motion)
   :prefix "SPC w"
   "r" 'windresize)
+
+(general-def
+  :states '(normal visual motion)
+  "SPC h d" 'c-hungry-delete)
 
 (general-def
   :states '(normal visual motion)
@@ -315,18 +315,22 @@
 
 (require 'org-tempo)
 
-(use-package all-the-icons
-  :ensure t
-  :if (display-graphic-p))
+(setq org-src-preserve-indentation nil
+      org-edit-src-content-indentation 0)
+
 
 (use-package simple-httpd
   :ensure t)
 
 (setq org-default-notes-file (concat org-directory "/notes.org"))
 
-(org-babel-do-load-languages
- 'org-babel-load-languages
- '((python . t)))
+(defun copy-current-line-position-to-clipboard ()
+  "Copy current line in file to clipboard as '</path/to/file>:<line-number>'."
+  (interactive)
+  (let ((path-with-line-number
+         (concat "[[file:" (buffer-file-name) "::" (number-to-string (line-number-at-pos)) "]]")))
+    (kill-new path-with-line-number)
+    (message (concat path-with-line-number " copied to clipboard"))))
 
 (setq org-babel-clojure-backend 'cider)
 
@@ -343,31 +347,4 @@
 		org-roam-ui-update-on-save t
 		org-roam-ui-open-on-start t))
 
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(custom-safe-themes
-   '("a9abd706a4183711ffcca0d6da3808ec0f59be0e8336868669dc3b10381afb6f" "02f57ef0a20b7f61adce51445b68b2a7e832648ce2e7efb19d217b6454c1b644" "1cae4424345f7fe5225724301ef1a793e610ae5a4e23c023076dc334a9eb940a" "2e05569868dc11a52b08926b4c1a27da77580daa9321773d92822f7a639956ce" "bf948e3f55a8cd1f420373410911d0a50be5a04a8886cabe8d8e471ad8fdba8e" "e1f4f0158cd5a01a9d96f1f7cdcca8d6724d7d33267623cc433fe1c196848554" "4fda8201465755b403a33e385cf0f75eeec31ca8893199266a6aeccb4adedfa4" "9d29a302302cce971d988eb51bd17c1d2be6cd68305710446f658958c0640f68" "680f62b751481cc5b5b44aeab824e5683cf13792c006aeba1c25ce2d89826426" "251ed7ecd97af314cd77b07359a09da12dcd97be35e3ab761d4a92d8d8cf9a71" "51c71bb27bdab69b505d9bf71c99864051b37ac3de531d91fdad1598ad247138" "ae426fc51c58ade49774264c17e666ea7f681d8cae62570630539be3d06fd964" "991ca4dbb23cab4f45c1463c187ac80de9e6a718edc8640003892a2523cb6259" "7e068da4ba88162324d9773ec066d93c447c76e9f4ae711ddd0c5d3863489c52" default))
- '(elfeed-feeds
-   '("http://feeds.bbci.co.uk/news/world/rss.xml#" "https://hnrss.org/frontpage" "http://feeds.bbci.co.uk/news/world/rss.xml"))
- '(ispell-dictionary nil)
- '(lisp-mode-hook '(paredit-mode sly-editing-mode))
- '(markdown-command "pandoc")
- '(package-selected-packages
-   '(nix-mode terraform-mode orderless org-babel chatgpt-shell chatgpt slack timu-spacegrey-theme ox-reveal all-the-icons-gnus clj-refactor elfeed typescript-mode fira-code-mode rust-mode htmlize lsp-jedi zenburn-theme ox-publish all-the-icons multi-vterm cmake-mode windresize which-key vterm vertico use-package rainbow-delimiters paredit marginalia magit lsp-treemacs js2-mode git-gutter-fringe general flycheck-clj-kondo expand-region evil consult-projectile company cider auto-package-update))
- '(safe-local-variable-values
-   '((eval progn
-	   (make-variable-buffer-local 'cider-jack-in-nrepl-middlewares)
-	   (add-to-list 'cider-jack-in-nrepl-middlewares "shadow.cljs.devtools.server.nrepl/middleware"))
-     (cider-repl-display-help-banner))))
-
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(flycheck-error ((t (:background "#3a3d4b" :underline nil))))
- '(flycheck-warning ((t (:background "SlateBlue4" :underline nil)))))
 
