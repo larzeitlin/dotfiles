@@ -17,6 +17,11 @@
 
 (set-face-attribute 'default nil :height 140)
 (setq org-confirm-babel-evaluate nil)
+(load-theme 'modus-vivendi)
+
+(use-package doom-modeline
+  :ensure t
+  :init (doom-modeline-mode 1))
 
 (use-package general
   :ensure t
@@ -53,7 +58,7 @@
   :ensure t
   :init (vertico-mode)
   :custom
-  (vertico-cycle t)
+  vertico-cycle t
   (setq completion-styles '(hotfuzz flex)))
 
 (use-package orderless
@@ -120,25 +125,45 @@
   (setq xref-show-xrefs-function #'consult-xref
 	xref-show-definitions-function #'consult-xref))
 
-(use-package paredit
+(use-package evil-cleverparens
   :ensure t 
-  :hook ((cider-repl-mode       . paredit-mode)
-	 (cider-mode            . paredit-mode)
-	 (clojure-mode          . paredit-mode)
-	 (emacs-lisp-mode       . paredit-mode)
-	 (lisp-mode             . paredit-mode)
-	 (lisp-interaction-mode . paredit-mode)
-	 (scheme-mode           . paredit-mode)
-	 (slime-mode            . paredit-mode)
-	 (slime-repl-mode       . paredit-mode)))
+  :hook ((cider-repl-mode       . evil-cleverparens-mode)
+	 (cider-mode            . evil-cleverparens-mode)
+	 (clojure-mode          . evil-cleverparens-mode)
+	 (emacs-lisp-mode       . evil-cleverparens-mode)
+	 (lisp-mode             . evil-cleverparens-mode)
+	 (lisp-interaction-mode . evil-cleverparens-mode)
+	 (scheme-mode           . evil-cleverparens-mode)
+	 (slime-mode            . evil-cleverparens-mode)
+	 (slime-repl-mode       . evil-cleverparens-mode)))
+
+(electric-pair-mode 1) ;; default on
+
+(general-def
+  :states '(normal visual motion)
+  :prefix "SPC s"
+  "w r" 'sp-wrap-round
+  "w c" 'sp-wrap-curly
+  "w s" 'sp-wrap-square
+  "r"   'sp-raise-sexp
+  "k s" 'sp-kill-sexp)
+
+(general-def
+  "<C-right>" 'sp-forward-slurp-sexp
+  "<C-left>" 'sp-forward-barf-sexp)
+
+(general-def
+  "<M-s-right>" 'sp-forward-sexp
+  "<M-s-left>" 'sp-backward-sexp)
+
+(general-def
+  :states '(normal visual motion)
+  "<M-up>" 'sp-raise-sexp)
 
 (use-package expand-region
   :ensure t
   :bind (("<M-s-up>" . 'er/expand-region)
 	 ("<M-s-down>" . 'er/contract-region)))
-
-(use-package lsp-treemacs
-  :ensure t)
 
 (use-package flycheck-clj-kondo
   :ensure t)
@@ -240,26 +265,6 @@
   "5" 'make-frame-command
   )
 
-(general-def
-  :states '(normal visual motion)
-  :prefix "SPC s"
-  "c r" 'paredit-close-round
-  "c c" 'paredit-close-curly
-  "c s" 'paredit-close-square
-  "w r" 'paredit-wrap-round
-  "w q" 'paredit-meta-doublequote
-  "r" 'paredit-raise-sexp
-  "k" 'paredit-kill
-  "b" 'paredit-backward
-  "f" 'paredit-forward)
-
-(general-def
-  "<M-s-right>" 'paredit-forward
-  "<M-s-left>" 'paredit-backward)
-
-(general-def
-  :states '(normal visual motion)
-  "<M-up>" 'paredit-raise-sexp)
 
 (general-def
   :states '(normal visual motion)
@@ -317,7 +322,6 @@
 
 (setq org-src-preserve-indentation nil
       org-edit-src-content-indentation 0)
-
 
 (use-package simple-httpd
   :ensure t)
