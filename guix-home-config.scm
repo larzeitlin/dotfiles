@@ -17,6 +17,7 @@
   #:use-module (gnu packages curl)
   #:use-module (gnu packages java)
   #:use-module (gnu packages readline)
+  #:use-module (gnu packages ssh)
   #:use-module (guix gexp))
 
 (define bashrc-include
@@ -29,7 +30,7 @@ export PATH=\"/usr/local/bin:$PATH\"")
 (define home-config
   (home-environment
    (packages
-    (list git htop ripgrep fzf nyxt gcc tmux curl emacs-vterm
+    (list git openssh htop ripgrep fzf nyxt gcc tmux curl emacs-vterm
 	  nyxt openjdk rlwrap icecat))
    (services
     (list
