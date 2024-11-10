@@ -15,19 +15,11 @@
 #+end_src
 
 * System Status
-#+begin_src bash :results output
-echo "Date: $(date '+%Y-%m-%d')"
-echo
-echo "Memory Usage:"
+#+begin_src sh :results output
+echo "$(date '+%Y-%m-%d')"
 free -h | awk '/^Mem/ {print "  Used:", $3, "/", $2}'
-echo
-echo "Disk Usage:"
 df -h --output=source,size,used,avail | awk 'NR==1 || /^\/dev/ {printf "  %-10s %-10s %-10s %-10s\n", $1, $2, $3, $4}'
-echo
-echo "Uptime:"
-uptime -p
-echo
-echo "Battery Status:"
+uptime
 cat /sys/class/power_supply/BAT*/capacity 2>/dev/null | awk '{print "  Battery:", $1 "%"}'
 #+end_src
 
