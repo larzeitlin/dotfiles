@@ -17,6 +17,8 @@
 
 (set-face-attribute 'default nil :height 140)
 (setq org-confirm-babel-evaluate nil)
+(setq org-return-follows-link  t)
+(global-so-long-mode 1)
 (load-theme 'modus-vivendi)
 
 (use-package doom-modeline
@@ -337,6 +339,10 @@
     (message (concat path-with-line-number " copied to clipboard"))))
 
 (setq org-babel-clojure-backend 'cider)
+
+(org-babel-do-load-languages
+'org-babel-load-languages
+'((shell . t)))
 
 (use-package org-roam
   :ensure t
