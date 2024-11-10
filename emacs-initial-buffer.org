@@ -7,19 +7,12 @@
         (symbol-value 'projectile-known-projects-on-file)) 
 #+end_src
 
-#+RESULTS:
-| [[file:~/gybe/cogsworth-with-queues/][~/gybe/cogsworth-with-queues/]] | [[file:~/gybe/nextweb/][~/gybe/nextweb/]] | [[file:~/gybe/letsdothetimewarpagain/][~/gybe/letsdothetimewarpagain/]] | [[file:~/gybe/gybe-api-v2/][~/gybe/gybe-api-v2/]] | [[file:~/gybe/scripts/][~/gybe/scripts/]] | [[file:~/dotfiles/][~/dotfiles/]] | [[file:~/projects/geotable/][~/projects/geotable/]] |
-
-
 * Bookmarks
 #+begin_src emacs-lisp :eval yes
 (with-temp-buffer
   (insert-file-contents "~/bookmarks.org")
   (split-string (buffer-string) "\n" t)) 
 #+end_src
-
-#+RESULTS:
-| [[https://about.gitlab.com/][gitlab]] | [[https://www.notion.so/gybe/][notion-gybe]] | [[https://d-9067a9ddf8.awsapps.com/start#/][aws-gybe]] | [[https://app.netlify.com/teams/gybe-eco/overview][netlify-gybe]] | [[https://manage.auth0.com/dashboard/us/dev-gybe/profile][auth0-gybe]] | [[https://nextjournal.com/][nextjournal]] | [[https://stage2.gybeapi.com/admin/][gybe-staging-admin]] | [[https://gybemaps-dashboard-staging.netlify.app/][gybemaps-staging]] | [[https://production2.gybeapi.com/admin/][gybe-prod-admin]] | [[https://dashboard.gybe.eco/][gybemaps-prod]] | [[https://app.datadoghq.eu/dashboard/][datadog]] |
 
 * System Status
 #+begin_src bash :results output
@@ -38,21 +31,3 @@ echo "Battery Status:"
 cat /sys/class/power_supply/BAT*/capacity 2>/dev/null | awk '{print "  Battery:", $1 "%"}'
 #+end_src
 
-#+RESULTS:
-#+begin_example
-Date: 2024-11-10
-
-Memory Usage:
-  Used: 5,9Gi / 15Gi
-
-Disk Usage:
-  Filesystem Size       Used       Avail     
-  /dev/nvme0n1p2 234G       211G       12G       
-  /dev/nvme0n1p1 511M       88M        424M      
-
-Uptime:
-up 4 days, 14 hours, 9 minutes
-
-Battery Status:
-  Battery: 0%
-#+end_example
