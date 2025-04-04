@@ -14,16 +14,12 @@
 (setq inhibit-startup-screen t)
 (setq ring-bell-function 'ignore)
 (setq initial-buffer-choice (file-truename "~/dotfiles/emacs-initial-buffer.org"))
-
-(set-face-attribute 'default nil :height 140)
 (setq org-confirm-babel-evaluate nil)
 (setq org-return-follows-link  t)
 (global-so-long-mode 1)
 (load-theme 'modus-vivendi)
 
-(use-package doom-modeline
-  :ensure t
-  :init (doom-modeline-mode 1))
+(load-library "~/secrets.el.gpg")
 
 (use-package general
   :ensure t
@@ -175,6 +171,19 @@
   :config
   (require 'flycheck-clj-kondo))
 
+(use-package lsp-pyright
+  :ensure t
+  :custom (lsp-pyright-langserver-command "pyright") ;; or basedpyright
+  :hook (python-mode . (lambda ()
+                          (require 'lsp-pyright)
+                          (lsp))))  ; or lsp-deferred
+
+(use-package python-black
+  :demand t
+  :ensure t
+  :after python
+  :hook (python-mode . python-black-on-save-mode-enable-dwim))
+
 (use-package flycheck 
   :ensure t
   :hook ((clojure-mode . flycheck-mode)))
@@ -213,18 +222,7 @@
   :states '(normal visual motion)
   :prefix "SPC g"
   "n" 'git-gutter:next-hunk
-  "p" 'git-gutter:previous-hunk)
-
-(use-package elpy
-  :ensure t
-  :init
-  (elpy-enable)
-  :config
-  (setq python-shell-interpreter "jupyter"
-      python-shell-interpreter-args "console --simple-prompt"
-      python-shell-prompt-detect-failure-warning nil)
-  (add-to-list 'python-shell-completion-native-disabled-interpreters
-               "jupyter"))
+  "p" 'git-gutter:previous-hunk)`
 
 (use-package which-key
   :ensure t
@@ -312,11 +310,6 @@
   "3" (lambda() (interactive)(find-file "~/dotfiles/i3-config"))
   "z" (lambda() (interactive)(find-file "~/.zshrc")))
 
-(load (expand-file-name "~/quicklisp/slime-helper.el"))
-
-(use-package slime
-  :ensure t
-  :config (setq inferior-lisp-program "/usr/local/bin/sbcl"))
 
 (setf swank:*communication-style* nil)
 
@@ -344,17 +337,43 @@
 'org-babel-load-languages
 '((shell . t)))
 
-(use-package org-roam
+
+(use-package ligature
   :ensure t
   :config
-  (setq org-roam-directory (file-truename "~/notes"))
-  (org-roam-db-autosync-mode))
+  ;; Enable the "www" ligature in every possible mode
+  (ligature-set-ligatures 't '("www"))
+  
+  ;; Enable common programming ligatures in modes you want
+  (ligature-set-ligatures '(prog-mode org-mode)
+    '("www" "**" "***" "**/" "*>" "*/" "\\\\" "\\\\\\" "{-" "::"
+      ":::" ":=" "!!" "!=" "!==" "-}" "----" "-->" "->" "->>"
+      "-<" "-<<" "-~" "#{" "#[" "##" "###" "####" "#(" "#?" "#_"
+      "#_(" ".-" ".=" ".." "..<" "..." "?=" "??" ";;" "/*" "/**"
+      "/=" "/=>" "/>" "//" "///" "&&" "||" "||=" "|=" "|>" "^=" "$>"
+      "++" "+++" "+>" "=:=" "==" "===" "==>" "=>" "=>>" "<="
+      "=<<" "=/=" ">-" ">=" ">=>" ">>" ">>-" ">>=" ">>>" "<*"
+      "<*>" "<|" "<|>" "<$" "<$>" "<!--" "<-" "<--" "<->" "<+"
+      "<+>" "<=" "<==" "<=>" "<=<" "<>" "<<" "<<-" "<<=" "<<<"
+      "<~" "<~~" "</" "</>" "~@" "~-" "~>" "~~" "~~>" "%%"))
+  
+  ;; Set the Fira Code font and enable ligatures globally
+  (global-ligature-mode 't))
 
-(use-package org-roam-ui
-  :after org-roam
-  :config (setq org-roam-ui-sync-theme t
-		org-roam-ui-follow 
-		org-roam-ui-update-on-save t
-		org-roam-ui-open-on-start t))
+;; Set Fira Code as the default font
+(set-face-attribute 'default nil
+                    :family "Fira Code"
+                    :height 160
+                    :weight 'normal)
 
+(use-package gptel
+  :ensure t
+  :config
+  (setq gptel-default-mode 'org-mode
+	gptel-backend
+	(gptel-make-perplexity "Perplexity"
+	  :key perplexity-api-key ; from ~/.secrets.el.gpg
+	  :stream t)))
 
+(setf (alist-get 'org-mode gptel-prompt-prefix-alist) "@user\n")
+(setf (alist-get 'org-mode gptel-response-prefix-alist) "@assistant\n")

@@ -1,25 +1,3 @@
 #+TITLE: Initial Buffer
 
-* Projects 
-#+begin_src emacs-lisp :eval yes
-(mapcar (lambda (file-path)
-          (org-link-make-string (concat "file:" file-path) file-path))
-        (symbol-value 'projectile-known-projects-on-file)) 
-#+end_src
-
-* Bookmarks
-#+begin_src emacs-lisp :eval yes
-(with-temp-buffer
-  (insert-file-contents "~/bookmarks.org")
-  (split-string (buffer-string) "\n" t)) 
-#+end_src
-
-* System Status
-#+begin_src sh :results output
-echo "$(date '+%Y-%m-%d')"
-free -h | awk '/^Mem/ {print "  Used:", $3, "/", $2}'
-df -h --output=source,size,used,avail | awk 'NR==1 || /^\/dev/ {printf "  %-10s %-10s %-10s %-10s\n", $1, $2, $3, $4}'
-uptime
-cat /sys/class/power_supply/BAT*/capacity 2>/dev/null | awk '{print "  Battery:", $1 "%"}'
-#+end_src
 
