@@ -75,10 +75,10 @@
   :after vertico
   :ensure t
   :custom
-  (marginalia-annotators)
-  '(marginalia-annotators-heavy
+  (marginalia-annotators
+   (marginalia-annotators-heavy
     marginalia-annotators-light
-    nil)
+    nil))'
   :init
   (marginalia-mode))
 
@@ -331,12 +331,13 @@
     (kill-new path-with-line-number)
     (message (concat path-with-line-number " copied to clipboard"))))
 
-(setq org-babel-clojure-backend 'cider)
 
 (org-babel-do-load-languages
 'org-babel-load-languages
-'((shell . t)))
+'((shell . t)
+  (clojure . t)))
 
+(setq org-babel-clojure-backend 'cider)
 
 (use-package ligature
   :ensure t
@@ -363,13 +364,14 @@
 ;; Set Fira Code as the default font
 (set-face-attribute 'default nil
                     :family "Fira Code"
-                    :height 160
+                    :height 180
                     :weight 'normal)
 
 (use-package gptel
   :ensure t
   :config
   (setq gptel-default-mode 'org-mode
+	gptel-model 'sonar-pro
 	gptel-backend
 	(gptel-make-perplexity "Perplexity"
 	  :key perplexity-api-key ; from ~/.secrets.el.gpg
