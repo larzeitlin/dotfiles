@@ -1,0 +1,593 @@
+#+TITLE: Emacs Configuration
+#+AUTHOR: Luke
+#+PROPERTY: header-args:emacs-lisp :tangle config.el
+
+* Package Management
+
+Set up package repositories and initialize the package system.
+
+#+begin_src emacs-lisp
+(require 'package)
+(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+(package-initialize)
+#+end_src
+
+* Performance Optimizations
+
+Settings to improve Emacs startup and runtime performance.
+
+#+begin_src emacs-lisp
+;; Performance optimizations
+(setq read-process-output-max (* 1024 1024))
+
+;; Startup time measurement
+(add-hook 'emacs-startup-hook
+          (lambda ()
+            (message "Emacs loaded in %s with %d garbage collections."
+                     (format "%.2f seconds"
+                             (float-time
+                              (time-subtract after-init-time before-init-time)))
+                     gcs-done)))
+#+end_src
+
+* UI Configuration
+
+Basic UI settings to create a clean, minimal interface.
+
+#+begin_src emacs-lisp
+(tool-bar-mode -1)
+(menu-bar-mode -1)
+(scroll-bar-mode -1)
+(column-number-mode)
+(global-display-line-numbers-mode t)
+(global-visual-line-mode t)
+(show-paren-mode)
+#+end_src
+
+* Basic Settings
+
+Core Emacs configuration for a better user experience.
+
+#+begin_src emacs-lisp
+(setq backup-directory-alist '(("" . "~/.emacs.d/emacs-backup")))
+(setq auto-save-default nil)
+(setq create-lockfiles nil)
+(setq inhibit-startup-screen t)
+(setq ring-bell-function 'ignore)
+(setq initial-buffer-choice (file-truename "~/dotfiles/emacs-initial-buffer.org"))
+(setq org-confirm-babel-evaluate nil)
+(setq org-return-follows-link  t)
+(global-so-long-mode 1)
+(load-theme 'modus-operandi)
+
+;; Auto-revert files when changed on disk
+(global-auto-revert-mode 1)
+(setq auto-revert-verbose nil)  ; Don't show revert messages
+(setq global-auto-revert-non-file-buffers t)  ; Also revert dired buffers
+#+end_src
+
+* GPG Configuration
+
+Settings for GPG integration.
+
+#+begin_src emacs-lisp
+;(load-library "~/secrets.el.gpg")
+#+end_src
+
+* Evil Mode
+
+Vim-style modal editing configuration.
+
+#+begin_src emacs-lisp
+(use-package general
+  :ensure t
+  :init (general-auto-unbind-keys))
+
+(use-package evil
+  :ensure t
+  :config (evil-mode 1))
+
+(with-eval-after-load 'evil
+  (define-key evil-normal-state-map (kbd "C-r") nil)
+  (define-key evil-insert-state-map (kbd "C-r") nil)
+  (define-key evil-visual-state-map (kbd "C-r") nil))
+#+end_src
+
+* Version Control
+
+Git integration with Magit.
+
+#+begin_src emacs-lisp
+(use-package magit
+  :ensure t
+  :init (setq magit-display-buffer-function #'magit-display-buffer-fullframe-status-v1))
+#+end_src
+
+* Visual Enhancements
+
+Packages for better visual feedback and aesthetics.
+
+#+begin_src emacs-lisp
+(use-package rainbow-delimiters
+  :ensure t
+  :hook ((prog-mode . rainbow-delimiters-mode)
+	 (slime-repl-mode . rainbow-delimiters-mode)))
+#+end_src
+
+* Completion Framework
+
+Modern completion system with Company, Vertico, and Orderless.
+
+#+begin_src emacs-lisp
+(use-package company
+  :ensure t
+  :config
+  (global-company-mode))
+
+(use-package savehist
+  :ensure t
+  :init
+  (savehist-mode))
+
+(use-package vertico
+  :ensure t
+  :init (vertico-mode)
+  :custom
+  vertico-cycle t)
+
+(use-package orderless
+  :ensure t
+  :init
+  (setq completion-styles '(orderless basic)
+        completion-category-defaults nil
+        completion-category-overrides '((file (styles partial-completion)))))
+
+(use-package marginalia
+  :after vertico
+  :ensure t
+  :config
+  (setq marginalia-annotators
+        '(marginalia-annotators-heavy
+          marginalia-annotators-light
+          nil))
+  (marginalia-mode))
+#+end_src
+
+* Project Management
+
+Projectile for project-based workflows.
+
+#+begin_src emacs-lisp
+(use-package projectile
+  :ensure t
+  :diminish projectile-mode
+  :config (projectile-mode)
+  :bind-keymap ("C-c p" . projectile-command-map))
+#+end_src
+
+* Package Updates
+
+Automatic package update management.
+
+#+begin_src emacs-lisp
+(use-package auto-package-update
+  :ensure t
+  :defer t
+  :custom
+  (auto-package-update-interval 7)
+  (auto-package-update-prompt-before-update t)
+  (auto-package-update-hide-results t)
+  :config
+  (auto-package-update-maybe)
+  (auto-package-update-at-time "09:00"))
+#+end_src
+
+* Clojure Development
+
+CIDER and Clojure development configuration.
+
+#+begin_src emacs-lisp
+(use-package cider
+  :ensure t
+  :init
+  (setq cider-repl-pop-to-buffer-on-connect 'display-only)
+  (setq cider-popup-stacktraces nil)
+  (setq cider-font-lock-dynamically '(macro core function var))
+  (setq cider-show-error-buffer nil)
+  (setq cider-repl-buffer-size-limit 100000)
+  (setq cider-save-file-on-load t))
+#+end_src
+
+* Enhanced Search and Navigation
+
+Consult for better search and navigation.
+
+#+begin_src emacs-lisp
+(use-package consult
+  :ensure t
+  :bind (("C-x b" . consult-buffer)
+	 ("M-y" . consult-yank-pop))
+  :hook (completion-list-mode . consult-preview-at-point-mode)
+  :init 
+  
+  (setq register-preview-delay 0.5
+	register-preview-function #'consult-register-format)
+
+  (advice-add #'register-preview :override #'consult-register-window)
+
+  (setq xref-show-xrefs-function #'consult-xref
+	xref-show-definitions-function #'consult-xref))
+#+end_src
+
+* Structured Editing
+
+Evil-cleverparens for structured editing in Lisp-like languages.
+
+#+begin_src emacs-lisp
+(use-package evil-cleverparens
+  :ensure t 
+  :hook ((cider-repl-mode       . evil-cleverparens-mode)
+	 (cider-mode            . evil-cleverparens-mode)
+	 (clojure-mode          . evil-cleverparens-mode)
+	 (emacs-lisp-mode       . evil-cleverparens-mode)
+	 (lisp-mode             . evil-cleverparens-mode)
+	 (lisp-interaction-mode . evil-cleverparens-mode)
+	 (scheme-mode           . evil-cleverparens-mode)
+	 (slime-mode            . evil-cleverparens-mode)
+	 (slime-repl-mode       . evil-cleverparens-mode)))
+
+(electric-pair-mode 1) ;; default on
+#+end_src
+
+* Smartparens Keybindings
+
+Keybindings for structural editing operations.
+
+#+begin_src emacs-lisp
+(general-def
+  :states '(normal visual motion)
+  :prefix "SPC s"
+  "w r" 'sp-wrap-round
+  "w c" 'sp-wrap-curly
+  "w s" 'sp-wrap-square
+  "r"   'sp-raise-sexp
+  "k s" 'sp-kill-sexp)
+
+(general-def
+  "<C-right>" 'sp-forward-slurp-sexp
+  "<C-left>" 'sp-forward-barf-sexp)
+
+(general-def
+  "<M-s-right>" 'sp-forward-sexp
+  "<M-s-left>" 'sp-backward-sexp)
+
+(general-def
+  :states '(normal visual motion)
+  "<M-up>" 'sp-raise-sexp)
+#+end_src
+
+* Text Selection
+
+Expand-region for intelligent text selection.
+
+#+begin_src emacs-lisp
+(use-package expand-region
+  :ensure t
+  :bind (("<M-s-up>" . 'er/expand-region)
+	 ("<M-s-down>" . 'er/contract-region)))
+#+end_src
+
+* Syntax Checking
+
+Flycheck with Clojure support.
+
+#+begin_src emacs-lisp
+(use-package flycheck-clj-kondo
+  :ensure t)
+
+(use-package clojure-mode
+  :ensure t
+  :config
+  (require 'flycheck-clj-kondo))
+
+(use-package flycheck 
+  :ensure t
+  :hook ((clojure-mode . flycheck-mode)))
+#+end_src
+
+* Python Development
+
+Python development with LSP and Black formatting.
+
+#+begin_src emacs-lisp
+(use-package lsp-pyright
+  :ensure t
+  :custom (lsp-pyright-langserver-command "pyright") ;; or basedpyright
+  :hook (python-mode . (lambda ()
+                          (require 'lsp-pyright)
+                          (lsp))))  ; or lsp-deferred
+
+(use-package python-black
+  :demand t
+  :ensure t
+  :after python
+  :hook (python-mode . python-black-on-save-mode-enable-dwim))
+#+end_src
+
+* Language Server Protocol
+
+LSP configuration for multiple programming languages.
+
+#+begin_src emacs-lisp
+(use-package lsp-mode
+  :ensure t
+  :hook ((clojure-mode       . lsp-deferred)
+	 (clojurescript-mode . lsp-deferred)
+	 (clojurec-mode      . lsp-deferred)
+	 (js2-mode           . lsp-deferred)
+	 (python-mode        . lsp-deferred)
+	 (rust-mode          . lsp-deferred))
+  :init
+  (setq treemacs-space-between-root-nodes nil
+	company-minimum-prefix-length 1
+	lsp-lens-enable t
+	lsp-headerline-breadcrumb-enable nil)) 
+#+end_src
+
+* Git Integration
+
+Git gutter for showing changes in the buffer.
+
+#+begin_src emacs-lisp
+(use-package git-gutter
+  :ensure t
+  :hook (prog-mode . git-gutter-mode)
+  :config
+  (setq git-gutter:update-interval 0.02
+        git-gutter:added-sign "+"
+        git-gutter:deleted-sign "-"
+        git-gutter:modified-sign "~")
+  (set-face-foreground 'git-gutter:added "green")
+  (set-face-foreground 'git-gutter:deleted "red")
+  (set-face-foreground 'git-gutter:modified "yellow"))
+#+end_src
+
+* Help and Discovery
+
+Which-key for keybinding discovery.
+
+#+begin_src emacs-lisp
+(use-package which-key
+  :ensure t
+  :defer t
+  :config (which-key-mode))
+#+end_src
+
+* Terminal Integration
+
+Vterm for better terminal emulation.
+
+#+begin_src emacs-lisp
+(use-package vterm
+  :ensure t
+  :config)
+
+(use-package multi-vterm :ensure t)
+
+(use-package consult-projectile
+  :ensure t)
+#+end_src
+
+* Keybindings
+
+** Vterm Keybindings
+
+#+begin_src emacs-lisp
+(general-def
+  :states '(normal)
+  :keymaps 'vterm-mode-map
+  "p" 'vterm-yank
+  "P" 'vterm-yank)
+#+end_src
+
+** Main Keybindings
+
+#+begin_src emacs-lisp
+(general-def
+  :states  '(normal visual motion)
+  :prefix "SPC"
+  "SPC" 'consult-projectile-find-file
+  "<tab>" 'projectile-switch-project
+  "j" 'dired-jump
+  "p" 'consult-git-grep
+  "f" 'consult-line
+  "B" 'consult-line-multi
+  "b" 'consult-buffer
+  "d" 'evil-goto-definition
+  "r" 'lsp-find-references
+  "v" 'vterm-other-window
+  "y" 'consult-yank-pop
+  "o" 'other-window
+  "0" 'delete-window
+  "1" 'delete-other-windows
+  "3" 'split-window-horizontally
+  "2" 'split-window-vertically
+  "5" 'make-frame-command
+  )
+#+end_src
+
+** Clojure/CIDER Keybindings
+
+#+begin_src emacs-lisp
+(general-def
+  :states '(normal visual motion)
+  :prefix "SPC c"
+  "e l" 'cider-eval-last-sexp
+  "e s" 'cider-eval-dwim
+  "e r" 'cider-eval-last-sexp-to-repl  
+  "i" 'cider-inspect-last-sexp
+  "n" 'cider-repl-set-ns
+  "d" 'cider-doc
+  "l" 'cider-load-buffer
+  "q" 'cider-quit
+  "r" 'cider-switch-to-repl-buffer
+  "b" 'cider-switch-to-last-clojure-buffer
+  "j s" 'cider-jack-in-cljs
+  "j c" 'cider-jack-in-clj)
+#+end_src
+
+** Git Keybindings
+
+#+begin_src emacs-lisp
+(general-def
+  :states '(normal visual motion)
+  :prefix "SPC g"
+  "n" 'git-gutter:next-hunk
+  "p" 'git-gutter:previous-hunk)
+
+(general-def
+  :states '(normal visual motion)
+  :prefix "SPC m"
+  "s" 'magit-status)
+#+end_src
+
+** Text Scaling
+
+#+begin_src emacs-lisp
+(general-def
+  "C-+" 'text-scale-increase
+  "C--" 'text-scale-decrease)
+#+end_src
+
+** Window Management
+
+#+begin_src emacs-lisp
+(use-package windresize
+  :ensure t
+  :defer t)
+
+(general-def
+  :states '(normal visual motion)
+  :prefix "SPC w"
+  "r" 'windresize)
+#+end_src
+
+** Editing Helpers
+
+#+begin_src emacs-lisp
+(general-def
+  :states '(normal visual motion)
+  "SPC h d" 'c-hungry-delete)
+#+end_src
+
+** Quick File Access
+
+#+begin_src emacs-lisp
+(general-def
+  :states '(normal visual motion)
+  :prefix "SPC i"
+  "e" (lambda() (interactive)(find-file "~/dotfiles/init.el"))
+  "3" (lambda() (interactive)(find-file "~/dotfiles/i3-config"))
+  "z" (lambda() (interactive)(find-file "~/.zshrc")))
+#+end_src
+
+* Lisp Development
+
+Additional Lisp development settings.
+
+#+begin_src emacs-lisp
+(setf swank:*communication-style* nil)
+#+end_src
+
+* Org Mode Configuration
+
+Org-mode setup with Babel support.
+
+#+begin_src emacs-lisp
+(require 'org-tempo)
+
+(setq org-src-preserve-indentation nil
+      org-edit-src-content-indentation 0)
+
+(use-package simple-httpd
+  :ensure t)
+
+(setq org-default-notes-file (concat org-directory "/notes.org"))
+#+end_src
+
+** Org Babel
+
+#+begin_src emacs-lisp
+(org-babel-do-load-languages
+'org-babel-load-languages
+'((shell . t)
+  (clojure . t)))
+
+(setq org-babel-clojure-backend 'cider)
+#+end_src
+
+** Custom Functions
+
+#+begin_src emacs-lisp
+(defun copy-current-line-position-to-clipboard ()
+  "Copy current line in file to clipboard as '</path/to/file>:<line-number>'."
+  (interactive)
+  (let ((path-with-line-number
+         (concat "[[file:" (buffer-file-name) "::" (number-to-string (line-number-at-pos)) "]]")))
+    (kill-new path-with-line-number)
+    (message (concat path-with-line-number " copied to clipboard"))))
+#+end_src
+
+* Font and Ligatures
+
+Font configuration with programming ligatures.
+
+#+begin_src emacs-lisp
+(use-package ligature
+  :ensure t
+  :config
+  ;; Enable the "www" ligature in every possible mode
+  (ligature-set-ligatures 't '("www"))
+  
+  ;; Enable common programming ligatures in modes you want
+  (ligature-set-ligatures '(prog-mode org-mode)
+    '("www" "**" "***" "**/" "*>" "*/" "\\\\" "\\\\\\" "{-" "::"
+      ":::" ":=" "!!" "!=" "!==" "-}" "----" "-->" "->" "->>"
+      "-<" "-<<" "-~" "#{" "#[" "##" "###" "####" "#(" "#?" "#_"
+      "#_(" ".-" ".=" ".." "..<" "..." "?=" "??" ";;" "/*" "/**"
+      "/=" "/=>" "/>" "//" "///" "&&" "||" "||=" "|=" "|>" "^=" "$>"
+      "++" "+++" "+>" "=:=" "==" "===" "==>" "=>" "=>>" "<="
+      "=<<" "=/=" ">-" ">=" ">=>" ">>" ">>-" ">>=" ">>>" "<*"
+      "<*>" "<|" "<|>" "<$" "<$>" "<!--" "<-" "<--" "<->" "<+"
+      "<+>" "<=" "<==" "<=>" "<=<" "<>" "<<" "<<-" "<<=" "<<<"
+      "<~" "<~~" "</" "</>" "~@" "~-" "~>" "~~" "~~>" "%%"))
+  
+  ;; Set the Fira Code font and enable ligatures globally
+  (global-ligature-mode 't))
+
+;; Set Fira Code as the default font
+(set-face-attribute 'default nil
+                    :family "Fira Code"
+                    :height 110
+                    :weight 'normal)
+#+end_src
+
+* AI Integration
+
+GPTel configuration for AI assistance.
+
+#+begin_src emacs-lisp
+(use-package gptel
+  :ensure t
+  :config
+  (setq gptel-default-mode 'org-mode
+	gptel-model 'sonar-pro
+	gptel-backend
+	(gptel-make-anthropic "Claude"
+	  :key 
+	  "none"
+	  :stream t)))
+
+(setf (alist-get 'org-mode gptel-prompt-prefix-alist) "@user\n")
+(setf (alist-get 'org-mode gptel-response-prefix-alist) "@assistant\n")
+#+end_src
