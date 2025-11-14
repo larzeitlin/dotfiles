@@ -42,6 +42,9 @@ Basic UI settings to create a clean, minimal interface.
 (global-display-line-numbers-mode t)
 (global-visual-line-mode t)
 (show-paren-mode)
+;; handle issue with emacs flickering on macos
+(modify-all-frames-parameters '((inhibit-double-buffering . t)))
+
 #+end_src
 
 * Basic Settings
@@ -519,11 +522,40 @@ Org-mode setup with Babel support.
 
 #+begin_src emacs-lisp
 (org-babel-do-load-languages
-'org-babel-load-languages
-'((shell . t)
-  (clojure . t)))
+ 'org-babel-load-languages
+ '((shell . t)
+   (clojure . t)
+   (plantuml . t)
+   (python . t)))
 
+(setq org-babel-python-command "python3")
 (setq org-babel-clojure-backend 'cider)
+#+end_src
+
+** Org-Roam
+
+#+begin_src emacs-lisp
+(use-package org-roam
+  :ensure t
+  :custom
+  (org-roam-directory (file-truename "~/Documents/org-roam"))
+  :config
+  ;; If you're using a vertical completion framework, you might want a more informative completion interface
+  (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
+  (org-roam-db-autosync-mode)
+  )
+
+
+(use-package org-roam-ui
+  :ensure t
+  :after org-roam
+  :hook (after-init . org-roam-ui-mode)
+  :config
+  (setq org-roam-ui-sync-theme t
+        org-roam-ui-follow t
+        org-roam-ui-update-on-save t
+        org-roam-ui-open-on-start t))
+
 #+end_src
 
 ** Custom Functions
@@ -568,7 +600,7 @@ Font configuration with programming ligatures.
 ;; Set Fira Code as the default font
 (set-face-attribute 'default nil
                     :family "Fira Code"
-                    :height 110
+                    :height 120
                     :weight 'normal)
 #+end_src
 
